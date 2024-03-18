@@ -4,8 +4,7 @@
   "info": {
     "singularName": "todo",
     "pluralName": "todos",
-    "displayName": "todo",
-    "description": ""
+    "displayName": "todo"
   },
   "options": {
     "draftAndPublish": true
@@ -14,11 +13,6 @@
   "attributes": {
     "title": {
       "type": "string"
-    },
-    "todos": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::todo.todo"
     }
   }
 }

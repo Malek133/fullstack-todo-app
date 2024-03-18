@@ -4,7 +4,7 @@ export const REGISTER_FORM : IRegisterInput [] = [
 
     {
         type: 'text',
-        name: 'userName',
+        name: 'username',
         placeholder:'userName',
         validation:{
             required:true,
@@ -21,7 +21,7 @@ export const REGISTER_FORM : IRegisterInput [] = [
         }
     },
     {
-        type: 'text',
+        type: 'password',
         name: 'password',
         placeholder:'Password',
         validation:{

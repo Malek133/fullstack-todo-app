@@ -5,23 +5,60 @@ import Button from "../components/ui/Button";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup"
 import { regiterSchema } from "../components/validation";
+import {axiosInstance} from "../components/config/axios.config";
+import toast from "react-hot-toast";
+ import { useState } from "react";
+import { AxiosError } from "axios";
+import { IErrors } from "../components/interface";
 
 interface IFormInput {
-  userName: string
+  username: string
   email:string
   password:string
+  
 }
 
 const RegisterPage = () => {
+ const [isloading,setIsloading] =useState(false);
 
-  const { register, handleSubmit,
+  const { register, handleSubmit, 
     formState:{errors} } = useForm<IFormInput>({
     resolver: yupResolver(regiterSchema)
   })
-  const onSubmit: SubmitHandler<IFormInput> = (data) => {
-    console.log(data)
+  const onSubmit: SubmitHandler<IFormInput> = 
+  async (data) => {
+     
+      setIsloading(true)
+
+  try {
+    const {status} = await axiosInstance.post("/auth/local/register",data);
+     if(status === 200){
+      toast.success('Successfully toasted!',{
+        duration: 4000,
+        position: 'bottom-center',
+        style: {
+            backgroundColor:"black",
+            color:"white",
+            width:"fit-content"
+        },
+        
+      })
+     }
+
+  } catch (error) {
+    const errorObj = error as AxiosError<IErrors>;
+
+    toast.error(`${errorObj.response?.data.error.message}`,{
+      position:"bottom-center",
+      duration:4000,
+    })
+
+  } finally {
+    setIsloading(false)
+ }
   }
-  
+
+
  const renderRegister = REGISTER_FORM.map(({placeholder,
      type,name,validation},idx) => (
         <div key={idx}> <Input  placeholder={placeholder} type={type}
@@ -40,7 +77,11 @@ const RegisterPage = () => {
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
 
         {renderRegister}
-        <Button fullWidth>Register</Button>
+
+        <Button isloading={isloading} fullWidth>
+          {/* {isloading ? "loading..." : "Register"} */}
+          Register
+          </Button>
 
       </form>
     </div>
