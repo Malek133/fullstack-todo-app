@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { IErrors } from "../components/interface";
 import { axiosInstance } from "../components/config/axios.config";
 
+
 interface IFormInput {
   identifier:string
   password:string
@@ -42,18 +43,24 @@ const LoginPage = () => {
       setIsloading(true)
 
   try {
-    const {status} = await axiosInstance.post("/auth/local",data);
+    const {status,data:resData} = await 
+    axiosInstance.post("/auth/local",data);
+    console.log(resData);
      if(status === 200){
       toast.success('Her we go to Home!',{
-        duration: 4000,
+        duration: 2000,
         position: 'bottom-center',
         style: {
             backgroundColor:"black",
             color:"white",
             width:"fit-content"
         },
-        
-      })
+       
+      }) 
+      localStorage.setItem('loggedIn', JSON.stringify(resData));
+      setTimeout(() =>{
+        location.replace('/')
+      },2000)
      }
 
   } catch (error) {
