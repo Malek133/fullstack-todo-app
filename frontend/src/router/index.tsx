@@ -30,6 +30,15 @@ const router = createBrowserRouter(
           }
         />
         <Route
+          path="/profile"
+          element={
+            <ProtectedRoute isAllowed={userData} redirectPath="/login" 
+            data={userData}>
+              <h2>Profil pag</h2>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="login"
           element={
             <ProtectedRoute isAllowed={!userData?.jwt} redirectPath="/" 
