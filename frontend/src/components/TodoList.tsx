@@ -3,46 +3,129 @@ import { ITodo } from "./interface";
 import useAuthenticatedQuery from "../hook/useAuthenticatedQuery";
 import Modal from "./ui/Modal";
 import Input from "./ui/Input";
-import { useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
+import Textarea from "./ui/Textarea";
+import { axiosInstance } from "./config/axios.config";
 
 const TodoList = () => {
 
 
   const [isopenEditModel, setIsopenEditModel] = useState(false);
-  // const [isloading, setIsloading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isopenRemoveModel,setIsopenRemoveModel]=useState(false)
+   const [todoEdit, setTodoEdit] = useState<ITodo>({
+    id:0,
+    title:"",
+    des:""
+   });
   
       const storageKey = 'loggedIn';
   const userDataString = localStorage.getItem(storageKey);
   const userData = userDataString ? JSON.parse(userDataString) : null
 
 
-  const {isLoading,data} = useAuthenticatedQuery({queryKey:['todo'],
+  const {isLoading,data} = useAuthenticatedQuery({
+    queryKey:['todoList',`${todoEdit.id}`],
   url:'/users/me?populate=todos',config:{
     headers:{ 
        Authorization: `Bearer ${userData.jwt}`,
               }
-  }})
+  }
+})
 
   
-   if(isLoading) return <h3>Loading ...</h3>
   
-   const onToggelEditModal = () =>{
-    setIsopenEditModel(prev =>!prev)
-   }
+   const onCloseEditModal = () =>{
+    setIsopenEditModel(false)
+    setTodoEdit({id:0,title:"",des:""})
+  }
+
+  const onCloseRemovModal = () =>{
+    setIsopenRemoveModel(false)
+    
+  }
+
+
+   const onOpenEditModal = (todo:ITodo) =>{
+    setTodoEdit(todo)
+    setIsopenEditModel(true)
+    
+  }
+
+  const onOpenRemoveModal = (todo:ITodo) =>{
+    setTodoEdit(todo)
+    setIsopenRemoveModel(true)
+  }
+
+  const onChangeHandler = (e:
+    ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>{
+    const {value,name} = e.target;
+
+    setTodoEdit({
+      ...todoEdit,[name]: value
+    })
+  }
+
+  const submitHandeler = async (e:FormEvent<HTMLFormElement>) =>{
+    e.preventDefault();
+    const {title,des}= todoEdit;
+    try {
+    const {status} =  await axiosInstance.put(`/todos/${todoEdit.id}`,
+    {data:{title,des}},{
+      headers:{ 
+         Authorization: `Bearer ${userData.jwt}`,
+                }
+    })
+    if(status === 200){
+      onCloseEditModal()
+    }
+    } catch (error) {
+      console.log(error)
+    }finally {
+      setIsUpdating(false)
+    }
+
+    setIsopenEditModel(false)
+    setIsUpdating(true)
+  //  console.log(todoEdit)
+  }
+
+  const onRemove = async () =>{
+     
+    try {
+      const {status}=await axiosInstance.delete(`/todos/${todoEdit.id}`,{
+        headers:{ 
+          Authorization: `Bearer ${userData.jwt}`,
+                 }
+
+      })
+      if(status === 200){
+        onCloseRemovModal()
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+   
+
+   if(isLoading) return <h3>Loading ...</h3>
+
   return (
     <div className="space-y-1 ">
       { 
-      data.todos.length ? data.todos.map(({id,title}:ITodo) => (
-            <div key={id}  
+      data.todos.length ? data.todos.map((todo:ITodo) => (
+            <div key={todo.id}  
             className="flex items-center justify-between
        hover:bg-gray-100 duration-300 p-3
        rounded-md even:bg-gray-100">
-        <p className="w-full font-semibold">  -  {title}</p>
+        <p className="w-full font-semibold">   {todo.title}</p>
+        {/* <p className="w-full font-semibold">  {todo.des}</p> */}
         <div className="flex items-center justify-end w-full space-x-3">
           <Button variant={"blue"} size={"sm"}
-          onClick={onToggelEditModal}
-          >Edit</Button>
-          <Button variant={"danger"} size={"sm"}>
+          onClick={() => onOpenEditModal(todo)}>
+          Edit</Button>
+          <Button variant={"danger"} size={"sm"} 
+          onClick={() => onOpenRemoveModal(todo)}>
             Remove
           </Button>
         </div>
@@ -53,22 +136,50 @@ const TodoList = () => {
       }
 
       {/* Edit partie */}
-      <Modal closeModal={onToggelEditModal} isOpen={isopenEditModel}
+      <Modal closeModal={onCloseEditModal} isOpen={isopenEditModel}
       title="Edit Ths Product">
-        <Input value={'editer'} />
+        <form onSubmit={submitHandeler } className="space-y-1">
 
+        <Input name='title' value={todoEdit.title} onChange={onChangeHandler} />
+         <Textarea name="des" value={todoEdit.des} onChange={onChangeHandler} /> 
         <div className="flex justify-center items-center space-x-3 m-3">
-        <Button variant={"danger"} size={"sm"} onClick={onToggelEditModal}  >
+        <Button variant={"cancel"} size={"sm"} onClick={onCloseEditModal}  >
             Cancel
           </Button>
 
-          <Button variant={"blue"} size={"sm"}>
+          <Button variant={"blue"} size={"sm"} 
+          // isloading={isUpdating}
+          >
             Edit
           </Button>
-        </div>
+        </div> 
 
+        </form>
       </Modal>
       {/* fin Edit partie */}
+
+      {/* remove partie */}
+      <Modal closeModal={onCloseEditModal} isOpen={isopenRemoveModel}
+      title="Remove this Todo">
+        <form className="space-y-1">
+ 
+        <div className="flex justify-center items-center space-x-3 m-3">
+        
+
+          <Button variant={"danger"} size={"sm"} onClick={onRemove}>
+            Remove to Liste
+          </Button>
+
+          <Button variant={"cancel"} size={"sm"} 
+        onClick={onCloseRemovModal}>
+            Cancel
+          </Button>
+
+        </div> 
+
+        </form>
+      </Modal>
+      {/* fin remove partie */}
 
     </div>
   );

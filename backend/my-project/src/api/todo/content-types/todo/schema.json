@@ -16,10 +16,8 @@
       "type": "string",
       "required": true
     },
-    "todos": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::todo.todo"
+    "des": {
+      "type": "text"
     }
   }
 }

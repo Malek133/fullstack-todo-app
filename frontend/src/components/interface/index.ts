@@ -34,6 +34,7 @@ export interface IErrors {
 
 export interface ITodo {
     
-    id?:string
+     id?:number
     title:string
+    des:string
 }

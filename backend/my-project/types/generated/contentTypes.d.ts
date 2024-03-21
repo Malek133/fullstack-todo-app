@@ -375,7 +375,7 @@ export interface ApiTodoTodo extends Schema.CollectionType {
   };
   attributes: {
     title: Attribute.String & Attribute.Required;
-    todos: Attribute.Relation<'api::todo.todo', 'oneToMany', 'api::todo.todo'>;
+    des: Attribute.Text;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
