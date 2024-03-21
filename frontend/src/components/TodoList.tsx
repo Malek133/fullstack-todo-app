@@ -6,19 +6,22 @@ import Input from "./ui/Input";
 import { ChangeEvent, FormEvent, useState } from "react";
 import Textarea from "./ui/Textarea";
 import { axiosInstance } from "./config/axios.config";
+// import { array } from "yup";
+import TodoSkeleton from "./TodoSkeleton";
 
 const TodoList = () => {
 
 
   const [isopenEditModel, setIsopenEditModel] = useState(false);
+  const [isopenCreateModel, setIsopenCreateModel] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isopenRemoveModel,setIsopenRemoveModel]=useState(false)
    const [todoEdit, setTodoEdit] = useState<ITodo>({
-    id:0,
-    title:"",
-    des:""
+    id:0,title:"",des:""
    });
-  
+   const [todoAdd, setTodoAdd] = useState<ITodo>({title:"",des:""});
+
+     console.log(isUpdating)
       const storageKey = 'loggedIn';
   const userDataString = localStorage.getItem(storageKey);
   const userData = userDataString ? JSON.parse(userDataString) : null
@@ -40,6 +43,11 @@ const TodoList = () => {
     setTodoEdit({id:0,title:"",des:""})
   }
 
+  const onCloseCreateModal = () =>{
+    setIsopenCreateModel(false)
+     setTodoAdd({title:"",des:""})
+  }
+
   const onCloseRemovModal = () =>{
     setIsopenRemoveModel(false)
     
@@ -52,6 +60,11 @@ const TodoList = () => {
     
   }
 
+  const onOpenCreateModal = () =>{
+    setIsopenCreateModel(true)
+  }
+
+
   const onOpenRemoveModal = (todo:ITodo) =>{
     setTodoEdit(todo)
     setIsopenRemoveModel(true)
@@ -63,6 +76,14 @@ const TodoList = () => {
 
     setTodoEdit({
       ...todoEdit,[name]: value
+    })
+  }
+  const onChangeAddTodoHandler = (e:
+    ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>{
+    const {value,name} = e.target;
+
+    setTodoAdd({
+      ...todoAdd,[name]: value
     })
   }
 
@@ -90,6 +111,30 @@ const TodoList = () => {
   //  console.log(todoEdit)
   }
 
+  const submitAddHandeler = async (e:FormEvent<HTMLFormElement>) =>{
+    e.preventDefault();
+    const {title,des}= todoAdd;
+    try {
+    const {status} =  await axiosInstance.post('/todos',
+    {data:{title,des}},{
+      headers:{ 
+         Authorization: `Bearer ${userData.jwt}`,
+                }
+    })
+    if(status === 200){
+      onCloseCreateModal()
+    }
+    } catch (error) {
+      console.log(error)
+    }finally {
+      setIsUpdating(false)
+    }
+
+    setIsopenCreateModel(false)
+    setIsUpdating(true)
+  //  console.log(todoEdit)
+  }
+
   const onRemove = async () =>{
      
     try {
@@ -108,10 +153,32 @@ const TodoList = () => {
   }
    
 
-   if(isLoading) return <h3>Loading ...</h3>
+   if(isLoading)  
+   return (
+       <div className="space-y-1 ">
+         {
+          Array.from({length:4}).map((_,i)=>(
+            <TodoSkeleton key={i} />
+          ))
+         }
+       </div>
+  )
+   
 
   return (
     <div className="space-y-1 ">
+      <div className="m-5 flex justify-between items-center space-x-4">
+        <span></span>
+        <span></span>
+          <Button 
+          variant={"blue"} size={"sm"} 
+          onClick={()=> onOpenCreateModal()}>
+          Create New Todo
+          </Button>
+          <span></span>
+          <span></span>
+      </div>
+    
       { 
       data.todos.length ? data.todos.map((todo:ITodo) => (
             <div key={todo.id}  
@@ -180,6 +247,33 @@ const TodoList = () => {
         </form>
       </Modal>
       {/* fin remove partie */}
+
+       {/* Create partie */}
+       <Modal closeModal={onCloseCreateModal} isOpen={isopenCreateModel}
+      title="Create The Todo">
+        <form onSubmit={submitAddHandeler} className="space-y-1">
+
+        <Input name='title' value={todoAdd.title} 
+        onChange={onChangeAddTodoHandler} />
+
+         <Textarea name="des" value={todoAdd.des} 
+         onChange={onChangeAddTodoHandler} /> 
+
+        <div className="flex justify-center items-center space-x-3 m-3">
+        <Button variant={"cancel"} size={"sm"} onClick={onCloseCreateModal}  >
+            Cancel
+          </Button>
+
+          <Button variant={"blue"} size={"sm"} 
+          // isloading={isUpdating}
+          >
+           Create
+          </Button>
+        </div> 
+
+        </form>
+      </Modal>
+      {/* fin Create partie */}
 
     </div>
   );
