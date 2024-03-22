@@ -15,10 +15,10 @@ const TodoList = () => {
   const [isopenEditModel, setIsopenEditModel] = useState(false);
   const [isopenCreateModel, setIsopenCreateModel] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [queryVersion,setQueryversion]=useState(1)
   const [isopenRemoveModel,setIsopenRemoveModel]=useState(false)
    const [todoEdit, setTodoEdit] = useState<ITodo>({
-    id:0,title:"",des:""
-   });
+    id:0,title:"",des:""});
    const [todoAdd, setTodoAdd] = useState<ITodo>({title:"",des:""});
 
      console.log(isUpdating)
@@ -28,7 +28,7 @@ const TodoList = () => {
 
 
   const {isLoading,data} = useAuthenticatedQuery({
-    queryKey:['todoList',`${todoEdit.id}`],
+    queryKey:['todoList',`${queryVersion}`],
   url:'/users/me?populate=todos',config:{
     headers:{ 
        Authorization: `Bearer ${userData.jwt}`,
@@ -99,6 +99,7 @@ const TodoList = () => {
     })
     if(status === 200){
       onCloseEditModal()
+      setQueryversion(p => p + 1)
     }
     } catch (error) {
       console.log(error)
@@ -108,7 +109,7 @@ const TodoList = () => {
 
     setIsopenEditModel(false)
     setIsUpdating(true)
-  //  console.log(todoEdit)
+  
   }
 
   const submitAddHandeler = async (e:FormEvent<HTMLFormElement>) =>{
@@ -123,6 +124,7 @@ const TodoList = () => {
     })
     if(status === 200){
       onCloseCreateModal()
+      setQueryversion(p => p + 1)
     }
     } catch (error) {
       console.log(error)
@@ -146,6 +148,7 @@ const TodoList = () => {
       })
       if(status === 200){
         onCloseRemovModal()
+        setQueryversion(p => p + 1)
       }
     } catch (error) {
       console.log(error)
@@ -227,7 +230,7 @@ const TodoList = () => {
 
       {/* remove partie */}
       <Modal closeModal={onCloseEditModal} isOpen={isopenRemoveModel}
-      title="Remove this Todo">
+      title={`are you sure you wante Remove ${todoEdit.title}`}>
         <form className="space-y-1">
  
         <div className="flex justify-center items-center space-x-3 m-3">
