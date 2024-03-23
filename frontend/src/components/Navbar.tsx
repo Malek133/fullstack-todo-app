@@ -27,8 +27,15 @@ const Logoutin = () =>{
            items-center space-x-5">
 
            <NavLink to="/Profile">
-            <p className="text-xl font-medium text-black">
+            <p className="text-xl 
+            font-medium text-black">
               {userData.user.username}</p>
+            </NavLink> 
+
+            <NavLink to="/todos">
+            <p className="text-sm
+            font-medium text-black">
+               All Todos</p>
             </NavLink> 
 
             <Button fullWidth onClick={Logoutin}

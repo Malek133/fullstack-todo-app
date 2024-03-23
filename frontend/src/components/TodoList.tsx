@@ -6,7 +6,7 @@ import Input from "./ui/Input";
 import { ChangeEvent, FormEvent, useState } from "react";
 import Textarea from "./ui/Textarea";
 import { axiosInstance } from "./config/axios.config";
-// import { array } from "yup";
+import { faker } from '@faker-js/faker';
 import TodoSkeleton from "./TodoSkeleton";
 
 const TodoList = () => {
@@ -19,9 +19,8 @@ const TodoList = () => {
   const [isopenRemoveModel,setIsopenRemoveModel]=useState(false)
    const [todoEdit, setTodoEdit] = useState<ITodo>({
     id:0,title:"",des:""});
-   const [todoAdd, setTodoAdd] = useState<ITodo>({title:"",des:""});
+   const [todoAdd, setTodoAdd] = useState({title:"",des:""});
 
-     console.log(isUpdating)
       const storageKey = 'loggedIn';
   const userDataString = localStorage.getItem(storageKey);
   const userData = userDataString ? JSON.parse(userDataString) : null
@@ -35,8 +34,6 @@ const TodoList = () => {
               }
   }
 })
-
-  
   
    const onCloseEditModal = () =>{
     setIsopenEditModel(false)
@@ -52,7 +49,6 @@ const TodoList = () => {
     setIsopenRemoveModel(false)
     
   }
-
 
    const onOpenEditModal = (todo:ITodo) =>{
     setTodoEdit(todo)
@@ -78,6 +74,33 @@ const TodoList = () => {
       ...todoEdit,[name]: value
     })
   }
+
+  const generateTodos = async () =>{
+        
+    for (let index = 0; index < 100; index++) {
+  
+    try {
+        const {status}= await axiosInstance.post(`/todos/`,
+      {data:{title:faker.word.words(5),des:faker.lorem.paragraph(2)
+      ,user:[userData.user.id]}},{
+        headers:{ 
+           Authorization: `Bearer ${userData.jwt}`,
+                  }
+      })
+
+      if(status === 200){
+        
+        setQueryversion(p => p + 1)
+      }
+      
+      } catch (error) {
+        console.log(error)
+      }  
+      
+
+    }
+  }
+
   const onChangeAddTodoHandler = (e:
     ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>{
     const {value,name} = e.target;
@@ -108,7 +131,6 @@ const TodoList = () => {
     }
 
     setIsopenEditModel(false)
-    setIsUpdating(true)
   
   }
 
@@ -116,8 +138,8 @@ const TodoList = () => {
     e.preventDefault();
     const {title,des}= todoAdd;
     try {
-    const {status} =  await axiosInstance.post('/todos',
-    {data:{title,des}},{
+    const {status} =  await axiosInstance.post(`/todos`,
+    {data:{title,des,user:[userData.user.id]}},{
       headers:{ 
          Authorization: `Bearer ${userData.jwt}`,
                 }
@@ -133,8 +155,8 @@ const TodoList = () => {
     }
 
     setIsopenCreateModel(false)
-    setIsUpdating(true)
-  //  console.log(todoEdit)
+   setIsUpdating(false)
+  
   }
 
   const onRemove = async () =>{
@@ -169,26 +191,34 @@ const TodoList = () => {
    
 
   return (
-    <div className="space-y-1 ">
-      <div className="m-5 flex justify-between items-center space-x-4">
+    <div className="space-y-1 "> 
+    <div className="m-5 flex justify-center items-center space-x-4">
+      
         <span></span>
         <span></span>
-          <Button 
+        
+           <Button 
           variant={"blue"} size={"sm"} 
-          onClick={()=> onOpenCreateModal()}>
+          onClick={() => onOpenCreateModal()}>
           Create New Todo
           </Button>
-          <span></span>
-          <span></span>
-      </div>
+
+          <Button 
+          variant={"cancel"} size={"sm"} 
+          onClick={generateTodos}>
+          Take fake Todo
+          </Button>
+          
+          </div>
+      
     
       { 
-      data.todos.length ? data.todos.map((todo:ITodo) => (
+      data.todos.length ? data.todos.map((todo:ITodo,idx:number) => (
             <div key={todo.id}  
             className="flex items-center justify-between
        hover:bg-gray-100 duration-300 p-3
        rounded-md even:bg-gray-100">
-        <p className="w-full font-semibold">   {todo.title}</p>
+        <p className="w-full font-semibold">{idx+1} - {todo.title}</p> 
         {/* <p className="w-full font-semibold">  {todo.des}</p> */}
         <div className="flex items-center justify-end w-full space-x-3">
           <Button variant={"blue"} size={"sm"}
@@ -210,15 +240,19 @@ const TodoList = () => {
       title="Edit Ths Product">
         <form onSubmit={submitHandeler } className="space-y-1">
 
-        <Input name='title' value={todoEdit.title} onChange={onChangeHandler} />
-         <Textarea name="des" value={todoEdit.des} onChange={onChangeHandler} /> 
+        <Input name='title' value={todoEdit.title} 
+        onChange={onChangeHandler} />
+         <Textarea name="des" value={todoEdit.des}
+          onChange={onChangeHandler} /> 
+
         <div className="flex justify-center items-center space-x-3 m-3">
-        <Button variant={"cancel"} size={"sm"} onClick={onCloseEditModal}  >
+        <Button variant={"cancel"} size={"sm"} 
+        onClick={onCloseEditModal} type="button" >
             Cancel
           </Button>
 
           <Button variant={"blue"} size={"sm"} 
-          // isloading={isUpdating}
+           isloading={isUpdating}
           >
             Edit
           </Button>
@@ -241,7 +275,7 @@ const TodoList = () => {
           </Button>
 
           <Button variant={"cancel"} size={"sm"} 
-        onClick={onCloseRemovModal}>
+        onClick={onCloseRemovModal} type="button">
             Cancel
           </Button>
 
@@ -263,7 +297,8 @@ const TodoList = () => {
          onChange={onChangeAddTodoHandler} /> 
 
         <div className="flex justify-center items-center space-x-3 m-3">
-        <Button variant={"cancel"} size={"sm"} onClick={onCloseCreateModal}  >
+        <Button variant={"cancel"} size={"sm"} 
+        onClick={onCloseCreateModal} type="button" >
             Cancel
           </Button>
 

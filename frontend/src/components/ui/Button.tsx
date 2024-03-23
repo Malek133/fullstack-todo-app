@@ -33,12 +33,13 @@ interface ButtonProps extends HTMLAttributes<HTMLButtonElement>,
 VariantProps<typeof buttonVariants> {
   children: ReactNode;
   isloading?:boolean
+  type? : 'submit' | 'reset' | 'button';
 }
 
-const Button = ({ variant, size, fullWidth, className, 
+const Button = ({ variant, size, fullWidth, className,type, 
   isloading, children, ...props }: ButtonProps) => {
   return (
-    <button className={cn(buttonVariants({ variant, size, fullWidth, 
+    <button type={type} className={cn(buttonVariants({ variant, size, fullWidth, 
     className }))} {...props} disabled={isloading}>
 
       {isloading ?  <svg 
