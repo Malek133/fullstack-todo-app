@@ -20,12 +20,13 @@ const TodoList = () => {
    const [todoEdit, setTodoEdit] = useState<ITodo>({
     id:0,title:"",des:""});
    const [todoAdd, setTodoAdd] = useState({title:"",des:""});
+   
 
       const storageKey = 'loggedIn';
   const userDataString = localStorage.getItem(storageKey);
   const userData = userDataString ? JSON.parse(userDataString) : null
-
-
+ 
+  
   const {isLoading,data} = useAuthenticatedQuery({
     queryKey:['todoList',`${queryVersion}`],
   url:'/users/me?populate=todos',config:{
@@ -34,6 +35,8 @@ const TodoList = () => {
               }
   }
 })
+
+
   
    const onCloseEditModal = () =>{
     setIsopenEditModel(false)
@@ -78,10 +81,12 @@ const TodoList = () => {
   const generateTodos = async () =>{
         
     for (let index = 0; index < 100; index++) {
+       
   
     try {
         const {status}= await axiosInstance.post(`/todos/`,
-      {data:{title:faker.word.words(5),des:faker.lorem.paragraph(2)
+      {data:{title:faker.word.words(5),
+        des:faker.lorem.paragraph(2)
       ,user:[userData.user.id]}},{
         headers:{ 
            Authorization: `Bearer ${userData.jwt}`,
@@ -176,7 +181,6 @@ const TodoList = () => {
       console.log(error)
     }
   }
-   
 
    if(isLoading)  
    return (
@@ -188,6 +192,7 @@ const TodoList = () => {
          }
        </div>
   )
+
    
 
   return (
@@ -312,7 +317,7 @@ const TodoList = () => {
         </form>
       </Modal>
       {/* fin Create partie */}
-
+    
     </div>
   );
 };

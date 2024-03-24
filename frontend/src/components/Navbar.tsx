@@ -16,15 +16,15 @@ const Logoutin = () =>{
 }
 
   return (
-    <nav className="max-w-lg mx-auto mt-7 mb-20 bg-indigo-100 px-4 py-5 rounded-md">
+    <nav className="max-w-2xl mx-auto mt-7 mb-20 bg-indigo-100 px-4 py-5 rounded-md">
       <ul className="flex items-center justify-between">
         <li className="text-black duration-200 font-semibold text-lg">
           <NavLink to="/">Home</NavLink>
         </li>
-
+         
         {userData ? (
            <div className="text-white flex justify-center 
-           items-center space-x-5">
+           items-center space-x-14">
 
            <NavLink to="/Profile">
             <p className="text-xl 
@@ -33,9 +33,9 @@ const Logoutin = () =>{
             </NavLink> 
 
             <NavLink to="/todos">
-            <p className="text-sm
+            <p className="text-base
             font-medium text-black">
-               All Todos</p>
+              All_Todos</p>
             </NavLink> 
 
             <Button fullWidth onClick={Logoutin}
